@@ -1,0 +1,76 @@
+erDiagram
+    DIM_TIME {
+        int time_key PK
+        date full_date "UNIQUE NOT NULL"
+        int year "NOT NULL"
+        int quarter "NOT NULL"
+        int month "NOT NULL"
+        string month_name "NOT NULL"
+        int day "NOT NULL"
+        string day_name "NOT NULL"
+        bool is_weekend "NOT NULL"
+    }
+
+    DIM_CUSTOMER {
+        int customer_key PK
+        int customer_id "NOT NULL"
+        string full_name "NOT NULL"
+        string email "NOT NULL"
+        string city
+        string country
+        datetime valid_from "NOT NULL"
+        datetime valid_to "CHECK valid_to > valid_from"
+        bool is_current "NOT NULL DEFAULT TRUE"
+    }
+
+    DIM_PRODUCT {
+        int product_key PK
+        int product_id "NOT NULL UNIQUE"
+        string product_name "NOT NULL"
+        decimal unit_price "NOT NULL"
+        int brand_key FK "ON DELETE RESTRICT"
+        int category_key FK "ON DELETE RESTRICT"
+    }
+
+    DIM_CATEGORY {
+        int category_key PK
+        string category_name "NOT NULL UNIQUE"
+        int parent_category_key FK "ON DELETE RESTRICT"
+        string category_path "NOT NULL"
+    }
+
+    DIM_BRAND {
+        int brand_key PK
+        string brand_name "NOT NULL UNIQUE"
+        string description
+    }
+
+    FACT_SALES {
+        int sale_key PK "SERIAL"
+        int time_key FK "ON DELETE RESTRICT"
+        int customer_key FK "ON DELETE RESTRICT"
+        int product_key FK "ON DELETE RESTRICT"
+        int order_id "NOT NULL"
+        int quantity_sold "NOT NULL CHECK > 0"
+        decimal unit_price "NOT NULL CHECK > 0"
+        decimal total_amount "NOT NULL CHECK > 0"
+        CONSTRAINT unique_order "UNIQUE(time_key, customer_key, product_key, order_id)"
+    }
+
+    FACT_INVENTORY {
+        int time_key FK "ON DELETE RESTRICT"
+        int product_key FK "ON DELETE RESTRICT"
+        int quantity_available "NOT NULL CHECK >= 0"
+        int quantity_reserved "NOT NULL CHECK >= 0"
+        decimal avg_unit_price "NOT NULL CHECK > 0"
+        PRIMARY KEY "(time_key, product_key)"
+    }
+
+    DIM_TIME ||--o{ FACT_SALES : has
+    DIM_TIME ||--o{ FACT_INVENTORY : has
+    DIM_CUSTOMER ||--o{ FACT_SALES : has
+    DIM_PRODUCT ||--o{ FACT_SALES : sells
+    DIM_PRODUCT ||--o{ FACT_INVENTORY : tracks
+    DIM_CATEGORY ||--o{ DIM_PRODUCT : categorizes
+    DIM_BRAND ||--o{ DIM_PRODUCT : brands
+    DIM_CATEGORY |o--o{ DIM_CATEGORY : "has parent"
