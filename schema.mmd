@@ -1,0 +1,93 @@
+erDiagram
+  USER {
+    int id PK
+    string username "NOT NULL UNIQUE"
+    string email "NOT NULL UNIQUE"
+    string password "NOT NULL"
+    datetime created_at "NOT NULL DEFAULT now()"
+  }
+
+  PRODUCT {
+    int id PK
+    string name "NOT NULL"
+    text description
+    decimal price "NOT NULL"
+    int stock_quantity "NOT NULL"
+    string category "NOT NULL"
+  }
+
+  ORDER {
+    int id PK
+    int user_id FK "NOT NULL ON DELETE CASCADE"
+    string status "NOT NULL DEFAULT 'pending'"
+    datetime created_at "NOT NULL DEFAULT now()"
+    decimal total_amount "NOT NULL"
+  }
+
+  ORDER_ITEM {
+    int id PK
+    int order_id FK "NOT NULL ON DELETE CASCADE"
+    int product_id FK "NOT NULL ON DELETE RESTRICT"
+    int quantity "NOT NULL"
+    decimal price "NOT NULL"
+  }
+
+  REVIEW {
+    int id PK
+    int user_id FK "NOT NULL ON DELETE CASCADE"
+    int product_id FK "NOT NULL ON DELETE CASCADE"
+    int rating "NOT NULL CHECK rating >= 1 AND rating <= 5"
+    text comment
+    datetime created_at "NOT NULL DEFAULT now()"
+  }
+
+  ADDRESS {
+    int id PK
+    int user_id FK "NOT NULL ON DELETE CASCADE"
+    string address_line_1 "NOT NULL"
+    string address_line_2
+    string city "NOT NULL"
+    string state "NOT NULL"
+    string postal_code "NOT NULL"
+    string country "NOT NULL"
+  }
+
+  PAYMENT_METHOD {
+    int id PK
+    int user_id FK "NOT NULL ON DELETE CASCADE"
+    string card_number "NOT NULL"
+    date expiry_date "NOT NULL"
+    string card_type "NOT NULL"
+    datetime created_at "NOT NULL DEFAULT now()"
+  }
+
+  CATEGORY {
+    int id PK
+    string name "NOT NULL UNIQUE"
+    text description
+  }
+
+  USER ||--o{ ORDER : "places"
+  USER ||--o{ REVIEW : "writes"
+  USER ||--o{ ADDRESS : "has"
+  USER ||--o{ PAYMENT_METHOD : "owns"
+  ORDER ||--o{ ORDER_ITEM : "contains"
+  PRODUCT ||--o{ ORDER_ITEM : "in"
+  PRODUCT ||--o{ REVIEW : "reviewed"
+  CATEGORY ||--o{ PRODUCT : "categorises"
+
+  %% Enums
+  %% Product Category Enum
+  PRODUCT {
+    enum category "candles, cushions, wall_art, others"
+  }
+
+  %% Order Status Enum
+  ORDER {
+    enum status "getting_prepared, in_transition, completed"
+  }
+
+  %% Card Type Enum
+  PAYMENT_METHOD {
+    enum card_type "Visa, MasterCard, AmEx, PayPal"
+  }
