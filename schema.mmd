@@ -1,41 +1,40 @@
 erDiagram
-  USER {
+  CUSTOMER {
     int id PK
     string username "NOT NULL UNIQUE"
     string email "NOT NULL UNIQUE"
     string password "NOT NULL"
-    datetime created_at "NOT NULL DEFAULT now()"
+    datetime created_at "NOT NULL DEFAULT CURRENT_TIMESTAMP"
   }
 
   PRODUCT {
     int id PK
+    int category_id FK
     string name "NOT NULL"
     text description
     decimal price "NOT NULL"
     int stock_quantity "NOT NULL"
-    string category "NOT NULL"
   }
 
   ORDER {
     int id PK
-    int user_id FK "NOT NULL ON DELETE CASCADE"
-    string status "NOT NULL DEFAULT 'pending'"
+    int customer_id FK "ON DELETE CASCADE"
     datetime created_at "NOT NULL DEFAULT now()"
     decimal total_amount "NOT NULL"
+    enum status "getting_prepared (default), in_transition, completed, returned, cancelled"
   }
 
   ORDER_ITEM {
-    int id PK
-    int order_id FK "NOT NULL ON DELETE CASCADE"
-    int product_id FK "NOT NULL ON DELETE RESTRICT"
+    int order_id PK,FK "ON DELETE CASCADE"
+    int product_id PK,FK "ON DELETE CASCADE"
     int quantity "NOT NULL"
     decimal price "NOT NULL"
   }
 
   REVIEW {
     int id PK
-    int user_id FK "NOT NULL ON DELETE CASCADE"
-    int product_id FK "NOT NULL ON DELETE CASCADE"
+    int customer_id FK "ON DELETE CASCADE"
+    int product_id FK "ON DELETE CASCADE"
     int rating "NOT NULL CHECK rating >= 1 AND rating <= 5"
     text comment
     datetime created_at "NOT NULL DEFAULT now()"
@@ -43,7 +42,7 @@ erDiagram
 
   ADDRESS {
     int id PK
-    int user_id FK "NOT NULL ON DELETE CASCADE"
+    int customer_id FK "ON DELETE CASCADE"
     string address_line_1 "NOT NULL"
     string address_line_2
     string city "NOT NULL"
@@ -54,10 +53,10 @@ erDiagram
 
   PAYMENT_METHOD {
     int id PK
-    int user_id FK "NOT NULL ON DELETE CASCADE"
+    int customer_id FK "ON DELETE CASCADE"
+    enum card_type "Visa, MasterCard, AmEx"
     string card_number "NOT NULL"
     date expiry_date "NOT NULL"
-    string card_type "NOT NULL"
     datetime created_at "NOT NULL DEFAULT now()"
   }
 
@@ -67,21 +66,11 @@ erDiagram
     text description
   }
 
-  USER ||--o{ ORDER : "places"
-  USER ||--o{ REVIEW : "writes"
-  USER ||--o{ ADDRESS : "has"
-  USER ||--o{ PAYMENT_METHOD : "owns"
+  CUSTOMER ||--o{ ORDER : "places"
+  CUSTOMER ||--o{ REVIEW : "writes"
+  CUSTOMER ||--o{ ADDRESS : "has"
+  CUSTOMER ||--o{ PAYMENT_METHOD : "owns"
   ORDER ||--o{ ORDER_ITEM : "contains"
   PRODUCT ||--o{ ORDER_ITEM : "in"
   PRODUCT ||--o{ REVIEW : "reviewed"
   CATEGORY ||--o{ PRODUCT : "categorises"
-
-  %% Order Status Enum
-  ORDER {
-    enum status "getting_prepared, in_transition, completed"
-  }
-
-  %% Card Type Enum
-  PAYMENT_METHOD {
-    enum card_type "Visa, MasterCard, AmEx, PayPal"
-  }
