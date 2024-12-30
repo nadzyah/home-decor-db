@@ -1,6 +1,6 @@
-username,email,password,created_at
-johnsmith123,johnsmith123@gmail.com,hashed_password_5432,2024-01-15 08:30:22
-emmawilson456,emmawilson456@yahoo.com,hashed_password_7891,2023-12-28 14:45:33
-michaelbrown789,michaelbrown789@outlook.com,hashed_password_2345,2024-02-10 11:20:15
-sarahdavis234,sarahdavis234@hotmail.com,hashed_password_6789,2024-01-05 09:15:47
-davidtaylor567,davidtaylor567@gmail.com,hashed_password_3456,2024-02-01 16:40:28
+full_name,email,password,created_at
+John Smith,johnsmith123@gmail.com,hashed_password_5432,2024-01-15 08:30:22
+Emma Wilson,emmawilson456@yahoo.com,hashed_password_7891,2023-12-28 14:45:33
+Michael Brown,michaelbrown789@outlook.com,hashed_password_2345,2024-02-10 11:20:15
+Sarah Davis,sarahdavis234@hotmail.com,hashed_password_6789,2024-01-05 09:15:47
+David Taylor,davidtaylor567@gmail.com,hashed_password_3456,2024-02-01 16:40:28

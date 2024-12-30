@@ -1,76 +1,104 @@
 erDiagram
-  CUSTOMER {
-    int id PK
-    string username "NOT NULL UNIQUE"
-    string email "NOT NULL UNIQUE"
-    string password "NOT NULL"
-    datetime created_at "NOT NULL DEFAULT CURRENT_TIMESTAMP"
-  }
+    CUSTOMER {
+        int id PK
+        string full_name "NOT NULL UNIQUE"
+        string email "NOT NULL UNIQUE"
+        string password "NOT NULL"
+        datetime created_at "NOT NULL DEFAULT CURRENT_TIMESTAMP"
+    }
 
-  PRODUCT {
-    int id PK
-    int category_id FK
-    string name "NOT NULL"
-    text description
-    decimal price "NOT NULL"
-    int stock_quantity "NOT NULL"
-  }
+    BRAND {
+        int id PK
+        string name "NOT NULL UNIQUE"
+        text description
+    }
 
-  ORDER {
-    int id PK
-    int customer_id FK "ON DELETE CASCADE"
-    datetime created_at "NOT NULL DEFAULT now()"
-    decimal total_amount "NOT NULL"
-    enum status "getting_prepared (default), in_transition, completed, returned, cancelled"
-  }
+    CATEGORY {
+        int id PK
+        int parent_id FK "SELF REFERENCE"
+        string name "NOT NULL UNIQUE"
+        text description
+    }
 
-  ORDER_ITEM {
-    int order_id PK,FK "ON DELETE CASCADE"
-    int product_id PK,FK "ON DELETE CASCADE"
-    int quantity "NOT NULL"
-    decimal price "NOT NULL"
-  }
+    PRODUCT {
+        int id PK
+        int category_id FK
+        int brand_id FK
+        string name "NOT NULL"
+        text description
+        decimal price "NOT NULL, >= 0"
+        int stock_quantity "NOT NULL, >= 0"
+        datetime created_at "NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        datetime updated_at "NOT NULL DEFAULT CURRENT_TIMESTAMP"
+    }
 
-  REVIEW {
-    int id PK
-    int customer_id FK "ON DELETE CASCADE"
-    int product_id FK "ON DELETE CASCADE"
-    int rating "NOT NULL CHECK rating >= 1 AND rating <= 5"
-    text comment
-    datetime created_at "NOT NULL DEFAULT now()"
-  }
+    ORDER {
+        int id PK
+        int customer_id FK "ON DELETE CASCADE"
+        enum status "getting_prepared (default), in_transition, completed, returned, cancelled"
+        datetime created_at "NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        decimal total_amount "NOT NULL"
+    }
 
-  ADDRESS {
-    int id PK
-    int customer_id FK "ON DELETE CASCADE"
-    string address_line_1 "NOT NULL"
-    string address_line_2
-    string city "NOT NULL"
-    string state "NOT NULL"
-    string postal_code "NOT NULL"
-    string country "NOT NULL"
-  }
+    ORDER_ITEM {
+        int order_id PK,FK "ON DELETE CASCADE"
+        int product_id PK,FK "ON DELETE CASCADE"
+        int quantity "NOT NULL, > 0"
+        decimal price "NOT NULL, >= 0"
+    }
 
-  PAYMENT_METHOD {
-    int id PK
-    int customer_id FK "ON DELETE CASCADE"
-    enum card_type "Visa, MasterCard, AmEx"
-    string card_number "NOT NULL"
-    date expiry_date "NOT NULL"
-    datetime created_at "NOT NULL DEFAULT now()"
-  }
+    REVIEW {
+        int id PK
+        int customer_id FK "ON DELETE CASCADE"
+        int product_id FK "ON DELETE CASCADE"
+        int rating "NOT NULL CHECK rating >= 1 AND rating <= 5"
+        text comment
+        datetime created_at "NOT NULL DEFAULT CURRENT_TIMESTAMP"
+    }
 
-  CATEGORY {
-    int id PK
-    string name "NOT NULL UNIQUE"
-    text description
-  }
+    ADDRESS {
+        int id PK
+        int customer_id FK "ON DELETE CASCADE"
+        string address_line_1 "NOT NULL"
+        string address_line_2
+        string city "NOT NULL"
+        string state "NOT NULL"
+        string postal_code "NOT NULL"
+        string country "NOT NULL"
+    }
 
-  CUSTOMER ||--o{ ORDER : "places"
-  CUSTOMER ||--o{ REVIEW : "writes"
-  CUSTOMER ||--o{ ADDRESS : "has"
-  CUSTOMER ||--o{ PAYMENT_METHOD : "owns"
-  ORDER ||--o{ ORDER_ITEM : "contains"
-  PRODUCT ||--o{ ORDER_ITEM : "in"
-  PRODUCT ||--o{ REVIEW : "reviewed"
-  CATEGORY ||--o{ PRODUCT : "categorises"
+    PAYMENT_METHOD {
+        int id PK
+        int customer_id FK "ON DELETE CASCADE"
+        enum card_type "Visa, MasterCard, AmEx"
+        string card_number "NOT NULL"
+        date expiry_date "NOT NULL"
+        datetime created_at "NOT NULL DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    CART {
+        int id PK
+        int customer_id FK "ON DELETE CASCADE"
+        datetime created_at "NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        datetime updated_at "NOT NULL DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    CART_ITEM {
+        int cart_id PK,FK "ON DELETE CASCADE"
+        int product_id PK,FK "ON DELETE CASCADE"
+        int quantity "NOT NULL, > 0"
+    }
+
+    CUSTOMER ||--o{ ORDER : "places"
+    CUSTOMER ||--o{ REVIEW : "writes"
+    CUSTOMER ||--o{ ADDRESS : "has"
+    CUSTOMER ||--o{ PAYMENT_METHOD : "owns"
+    CUSTOMER ||--o{ CART : "has"
+    ORDER ||--o{ ORDER_ITEM : "contains"
+    PRODUCT ||--o{ ORDER_ITEM : "in"
+    PRODUCT ||--o{ REVIEW : "reviewed"
+    CATEGORY ||--o{ PRODUCT : "contains"
+    BRAND ||--o{ PRODUCT : "produces"
+    CART ||--o{ CART_ITEM : "contains"
+    PRODUCT ||--o{ CART_ITEM : "in"
+    CATEGORY |o--o{ CATEGORY : "has subcategories"
