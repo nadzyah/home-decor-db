@@ -108,6 +108,13 @@ cd olap/
 psql -U postgres -f transfer.sql
 ```
 
+7. Run queries to get more insights about the data
+
+```bash
+psql -U postgres -f oltp/queries.sql
+psql -U postgres -f olap/queries.sql
+```
+
 ## Data Flow
 
 1. Operational data is stored in the OLTP database
