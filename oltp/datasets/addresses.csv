@@ -1,0 +1,6 @@
+customer_email,address_line_1,address_line_2,city,state,postal_code,country
+"johnsmith123@gmail.com","123 Main St","Apt 4B","New York","NY","10001","USA"
+"emmawilson456@yahoo.com","456 Park Ave",null,"Los Angeles","CA","90001","USA"
+"michaelbrown789@outlook.com","789 Oak Rd","Suite 15","Chicago","IL","60601","USA"
+"sarahdavis234@hotmail.com","321 Pine St",null,"Houston","TX","77001","USA"
+"davidtaylor567@gmail.com","654 Maple Dr","Unit 7","Phoenix","AZ","85001","USA"

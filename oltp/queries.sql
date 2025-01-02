@@ -25,19 +25,6 @@ LEFT JOIN REVIEW r ON p.id = r.product_id
 GROUP BY p.id, p.name, p.stock_quantity
 ORDER BY total_revenue DESC NULLS LAST;
 
--- Cart abandonment analysis
-SELECT
-    p.name as product_name,
-    COUNT(ci.cart_id) as times_in_cart,
-    p.stock_quantity as current_stock,
-    p.price as unit_price
-FROM PRODUCT p
-JOIN CART_ITEM ci ON p.id = ci.product_id
-LEFT JOIN ORDER_ITEM oi ON p.id = oi.product_id
-WHERE oi.product_id IS NULL
-GROUP BY p.id, p.name, p.stock_quantity, p.price
-ORDER BY times_in_cart DESC;
-
 -- Customer address distribution
 SELECT
     country,
