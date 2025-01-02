@@ -77,13 +77,15 @@ createdb home_decor_db
 2. Initialise the OLTP schema:
 
 ```bash
-psql -d home_decor_db -f oltp/initialise.sql
+cd oltp/
+psql -d home_decor_db -f initialise.sql
 ```
 
 3. Load initial OLTP data:
 
 ```bash
-psql -d home_decor_db -f oltp/load.sql
+cd oltp/
+psql -d home_decor_db -f load.sql
 ```
 
 4. Create the OLAP database:
@@ -95,13 +97,15 @@ createdb home_decor_dw
 5. Initialise the OLAP schema:
 
 ```bash
-psql -d home_decor_dw -f olap/initialise.sql
+cd olap/
+psql -d home_decor_dw -f initialise.sql
 ```
 
 6. Run the ETL process:
 
 ```bash
-psql -U postgres -f olap/transfer.sql
+cd olap/
+psql -U postgres -f transfer.sql
 ```
 
 ## Data Flow
