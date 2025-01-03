@@ -86,6 +86,8 @@ SELECT * FROM dblink('dbname=home_decor_db',
          status VARCHAR, product_id INTEGER, quantity INTEGER,
          unit_price DECIMAL, total_amount DECIMAL);
 
+BEGIN;
+
 INSERT INTO DIM_TIME (
     full_date, year, quarter, month, month_name,
     day, day_name, is_weekend
@@ -212,8 +214,13 @@ JOIN DIM_CUSTOMER c ON s.customer_id = c.customer_id AND c.is_current = TRUE
 JOIN DIM_PRODUCT p ON s.product_id = p.product_id
 ON CONFLICT (time_key, customer_key, product_key, order_id) DO NOTHING;
 
+COMMIT;
+
 TRUNCATE TABLE staging.customers;
 TRUNCATE TABLE staging.categories;
 TRUNCATE TABLE staging.brands;
 TRUNCATE TABLE staging.products;
 TRUNCATE TABLE staging.sales;
+
+DROP SCHEMA staging CASCADE;
+DROP EXTENSION dblink CASCADE;
