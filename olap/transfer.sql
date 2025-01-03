@@ -49,26 +49,46 @@ CREATE TABLE IF NOT EXISTS staging.sales (
 TRUNCATE TABLE staging.customers, staging.categories, staging.brands,
               staging.products, staging.sales;
 
+BEGIN;
+
 INSERT INTO staging.customers
 SELECT * FROM dblink('dbname=home_decor_db',
-    'SELECT c.id, c.full_name, c.email, c.created_at
-     FROM CUSTOMER c')
-    AS c(customer_id INTEGER, full_name VARCHAR, email VARCHAR, created_at TIMESTAMP);
+    'SELECT DISTINCT ON (c.id)
+        c.id,
+        c.full_name,
+        c.email,
+        a.city,
+        a.country,
+        c.created_at
+     FROM CUSTOMER c
+     LEFT JOIN ADDRESS a ON c.id = a.customer_id
+     ORDER BY c.id, a.id')
+    AS c(customer_id INTEGER,
+         full_name VARCHAR,
+         email VARCHAR,
+         city VARCHAR,
+         country VARCHAR,
+         created_at TIMESTAMP);
 
 INSERT INTO staging.categories
 SELECT * FROM dblink('dbname=home_decor_db',
-    'SELECT id, name, parent_id, description FROM CATEGORY')
+    'SELECT id, name, parent_id, description
+     FROM CATEGORY
+     ORDER BY id')
     AS c(category_id INTEGER, category_name VARCHAR, parent_id INTEGER, description TEXT);
 
 INSERT INTO staging.brands
 SELECT * FROM dblink('dbname=home_decor_db',
-    'SELECT id, name, description FROM BRAND')
+    'SELECT id, name, description
+     FROM BRAND
+     ORDER BY id')
     AS b(brand_id INTEGER, brand_name VARCHAR, description TEXT);
 
 INSERT INTO staging.products
 SELECT * FROM dblink('dbname=home_decor_db',
     'SELECT id, name, price, stock_quantity, category_id, brand_id, created_at
-     FROM PRODUCT')
+     FROM PRODUCT
+     ORDER BY id')
     AS p(product_id INTEGER, product_name VARCHAR, price DECIMAL,
          stock_quantity INTEGER, category_id INTEGER, brand_id INTEGER,
          created_at TIMESTAMP);
@@ -77,15 +97,19 @@ INSERT INTO staging.sales
 SELECT * FROM dblink('dbname=home_decor_db',
     'SELECT o.id, o.customer_id, o.created_at, o.status,
             oi.product_id, oi.quantity, oi.price,
-            oi.quantity * oi.price as total_amount
+            (oi.quantity * oi.price) as total_amount
      FROM "order" o
      JOIN ORDER_ITEM oi ON o.id = oi.order_id
      WHERE o.created_at >= CURRENT_DATE - INTERVAL ''1 year''
-     AND o.status != ''cancelled''')
+     AND o.status != ''cancelled''
+     ORDER BY o.id')
     AS s(order_id INTEGER, customer_id INTEGER, order_date TIMESTAMP,
          status VARCHAR, product_id INTEGER, quantity INTEGER,
          unit_price DECIMAL, total_amount DECIMAL);
 
+COMMIT;
+
+-- Load dimensions and facts
 BEGIN;
 
 INSERT INTO DIM_TIME (
@@ -169,7 +193,7 @@ SET
 
 INSERT INTO DIM_CUSTOMER (
     customer_id, full_name, email, city, country,
-    valid_from, valid_to, is_current
+    joined_at, is_current
 )
 SELECT
     customer_id,
@@ -177,8 +201,7 @@ SELECT
     email,
     city,
     country,
-    CURRENT_TIMESTAMP,
-    NULL,
+    created_at,
     TRUE
 FROM staging.customers s
 WHERE NOT EXISTS (
@@ -223,4 +246,4 @@ TRUNCATE TABLE staging.products;
 TRUNCATE TABLE staging.sales;
 
 DROP SCHEMA staging CASCADE;
-DROP EXTENSION dblink CASCADE;
+DROP EXTENSION dblink;

@@ -18,10 +18,8 @@ CREATE TABLE DIM_CUSTOMER (
     email VARCHAR(255) NOT NULL,
     city VARCHAR(100),
     country VARCHAR(100),
-    valid_from TIMESTAMP NOT NULL,
-    valid_to TIMESTAMP,
-    is_current BOOLEAN NOT NULL DEFAULT TRUE,
-    CONSTRAINT valid_timeframe CHECK (valid_to IS NULL OR valid_to > valid_from)
+    joined_at TIMESTAMP NOT NULL CHECK (joined_at < CURRENT_TIMESTAMP),
+    is_current BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE DIM_BRAND (
@@ -72,7 +70,6 @@ CREATE TABLE FACT_INVENTORY (
 );
 
 CREATE INDEX idx_customer_current ON DIM_CUSTOMER(is_current) WHERE is_current = TRUE;
-CREATE INDEX idx_customer_valid ON DIM_CUSTOMER(valid_from, valid_to);
 CREATE INDEX idx_customer_id ON DIM_CUSTOMER(customer_id);
 CREATE INDEX idx_time_date ON DIM_TIME(full_date);
 CREATE INDEX idx_category_path ON DIM_CATEGORY(category_path);
@@ -114,8 +111,7 @@ BEGIN
         AND is_current = TRUE;
     END IF;
 
-    NEW.valid_from = CURRENT_TIMESTAMP;
-    NEW.valid_to = NULL;
+    NEW.joined_at = CURRENT_TIMESTAMP;
     NEW.is_current = TRUE;
 
     RETURN NEW;
