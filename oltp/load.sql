@@ -42,7 +42,8 @@ CREATE TEMP TABLE temp_orders (
 );
 
 CREATE TEMP TABLE temp_order_items (
-    order_id INTEGER,
+    customer_email VARCHAR(255),
+    order_date TIMESTAMP,
     product_name VARCHAR(255),
     quantity INTEGER,
     price DECIMAL(10,2)
@@ -107,20 +108,25 @@ FROM temp_addresses a
 JOIN CUSTOMER c ON a.customer_email = c.email
 WHERE NOT EXISTS (
     SELECT 1 FROM ADDRESS
-    WHERE customer_id = c.id
+    WHERE customer_id = (SELECT id FROM CUSTOMER WHERE email = a.customer_email)
     AND address_line_1 = a.address_line_1
 );
 
 WITH inserted_orders AS (
     INSERT INTO "order" (customer_id, status, created_at, total_amount)
-    SELECT
+    SELECT DISTINCT
         c.id as customer_id,
         o.status,
         o.created_at,
         o.total_amount
     FROM temp_orders o
     JOIN CUSTOMER c ON o.customer_email = c.email
-    RETURNING id
+    WHERE NOT EXISTS (
+        SELECT 1 FROM "order"
+        WHERE customer_id = (SELECT id FROM CUSTOMER WHERE email = o.customer_email)
+        AND created_at = o.created_at
+    )
+    RETURNING id, customer_id, created_at
 )
 INSERT INTO ORDER_ITEM (order_id, product_id, quantity, price)
 SELECT
@@ -129,7 +135,8 @@ SELECT
     oi.quantity,
     oi.price
 FROM temp_order_items oi
-JOIN inserted_orders o ON oi.order_id = o.id
+JOIN inserted_orders o ON o.created_at = oi.order_date
+JOIN CUSTOMER c ON oi.customer_email = c.email AND o.customer_id = c.id
 JOIN PRODUCT p ON oi.product_name = p.name;
 
 COMMIT;
