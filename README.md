@@ -73,7 +73,8 @@ Follow these steps to set up and run the project:
      ```
    - Load the initial data:
      ```bash
-     psql -d home_decor_db -f oltp/load.sql
+     cd oltp
+     psql -d home_decor_db -f load.sql
      ```
 
 2. **Create the OLAP Database**:
