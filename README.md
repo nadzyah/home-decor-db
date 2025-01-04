@@ -4,8 +4,8 @@
 > This README file serves as the complete documentation for the
 > project. No `*.doc` file is provided.
 
-This project implements a complete database solution for a home decor
-online shop application. It consists of two main components:
+This project implements a complete database solution for a home
+decor online shop application. It consists of two main components:
 
 1. **OLTP (Online Transaction Processing)**: Designed to support
    real-time operational activities.
@@ -14,7 +14,7 @@ online shop application. It consists of two main components:
 
 ## OLTP Database Schema
 
-The OLTP database is designed in **3NF** and consists of the following
+The OLTP database is designed in 3NF and consists of the following
 tables:
 
 - **CUSTOMER**: Stores user account information.
@@ -44,7 +44,7 @@ following tables:
 
 ### Dimension Tables
 
-- **DIM_CUSTOMER**: Stores customer information with **SCD Type 2**
+- **DIM_CUSTOMER**: Stores customer information with SCD Type 2
   for tracking changes over time.
 - **DIM_PRODUCT**: Contains product details.
 - **DIM_CATEGORY**: Represents product category hierarchy.
@@ -67,7 +67,7 @@ Follow these steps to set up and run the project:
      ```bash
      createdb home_decor_db
      ```
-   - Initialize the schema:
+   - Initialise the schema:
      ```bash
      psql -d home_decor_db -f oltp/initialise.sql
      ```
@@ -81,7 +81,7 @@ Follow these steps to set up and run the project:
      ```bash
      createdb home_decor_dw
      ```
-   - Initialize the OLAP schema:
+   - Initialise the OLAP schema:
      ```bash
      psql -d home_decor_dw -f olap/initialise.sql
      ```
@@ -95,11 +95,11 @@ Follow these steps to set up and run the project:
 4. **Run Queries for Insights**:
    - OLTP queries:
      ```bash
-     psql -U postgres -f oltp/queries.sql
+     psql -U postgres -d home_decor_db -f oltp/queries.sql
      ```
    - OLAP queries:
      ```bash
-     psql -U postgres -f olap/queries.sql
+     psql -U postgres -d home_decor_dw -f olap/queries.sql
      ```
 
 ## Power BI Report
