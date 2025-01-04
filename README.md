@@ -1,12 +1,11 @@
 # Home Decor Database Project
 
-> **Note**: This README file serves as the complete documentation for
-> the project. No `.doc` file is provided.
-
-## Project Overview
+> [!NOTE]
+> This README file serves as the complete documentation for the
+> project. No `*.doc` file is provided.
 
 This project implements a complete database solution for a home decor
-online shop app. It consists of two main components:
+online shop application. It consists of two main components:
 
 1. **OLTP (Online Transaction Processing)**: Designed to support
    real-time operational activities.
@@ -55,11 +54,11 @@ following tables:
 Please refer to the [olap/schema.mmd](olap/schema.mmd) file for the
 full snowflake schema.
 
-## Setup
+## Setup Instructions
 
-Before following the steps below, please ensure that PostgreSQL 12 or
-higher is installed. Scripts are rerunnable and include mechanisms to
-prevent overwriting unchanged data.
+Before following the steps below, please ensure that you're running
+PostgreSQL 12 or higher. Scripts are rerunnable and include mechanisms
+to prevent overwriting unchanged data.
 
 Follow these steps to set up and run the project:
 
