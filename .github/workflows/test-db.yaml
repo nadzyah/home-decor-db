@@ -1,0 +1,86 @@
+name: Test Database Setup
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install PostgreSQL client
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+
+    - name: Test OLTP Database Setup
+      env:
+        PGPASSWORD: postgres
+        PGUSER: postgres
+        PGHOST: localhost
+      run: |
+        # Create and initialize OLTP database
+        createdb home_decor_db
+        psql -d home_decor_db -f oltp/initialise.sql
+
+        # Load test data
+        cd oltp
+        psql -d home_decor_db -f load.sql
+        cd ..
+
+        # Run OLTP queries
+        psql -d home_decor_db -f oltp/queries.sql
+
+        # Verify key tables have data
+        psql -d home_decor_db -c "SELECT COUNT(*) FROM CUSTOMER;"
+        psql -d home_decor_db -c "SELECT COUNT(*) FROM PRODUCT;"
+        psql -d home_decor_db -c "SELECT COUNT(*) FROM \"order\";"
+
+    - name: Test OLAP Database Setup
+      env:
+        PGPASSWORD: postgres
+        PGUSER: postgres
+        PGHOST: localhost
+      run: |
+        # Create and initialize OLAP database
+        createdb home_decor_dw
+        psql -d home_decor_dw -f olap/initialise.sql
+
+        # Run ETL process
+        psql -f olap/transfer.sql
+
+        # Run OLAP queries
+        psql -d home_decor_dw -f olap/queries.sql
+
+        # Verify fact tables have data
+        psql -d home_decor_dw -c "SELECT COUNT(*) FROM FACT_SALES;"
+        psql -d home_decor_dw -c "SELECT COUNT(*) FROM FACT_INVENTORY;"
+
+    - name: Cleanup
+      if: always()
+      env:
+        PGPASSWORD: postgres
+        PGUSER: postgres
+        PGHOST: localhost
+      run: |
+        dropdb --if-exists home_decor_db
+        dropdb --if-exists home_decor_dw
